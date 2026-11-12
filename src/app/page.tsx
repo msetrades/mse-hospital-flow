@@ -3,9 +3,8 @@
 import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase/client";
+import { projectUnits, type Projection, type Unit } from "@/lib/flow";
 
-type Unit = { id?: string; name: string; beds: number; occupied: number; admissions: number; discharges: number; staffed: number; los: number };
-type Projection = Unit & { forecast: number; capacity: number; pressure: number; spillover: number };
 type Snapshot = { id: string; name: string; observed_at: string };
 type Scenario = { id: string; name: string; horizon_hours: number; created_at: string };
 const HEADERS = ["unit", "beds", "occupied", "admissions_24h", "discharges_24h", "staffed_beds", "avg_los_hours"];
@@ -142,11 +141,7 @@ export default function Home() {
     return () => { cancelled = true; };
   }, [workspaceId, activeSnapshotId]);
 
-  const projections = useMemo<Projection[]>(() => units.map((unit) => {
-    const projected = Math.max(0, unit.occupied + (unit.admissions - unit.discharges) * hours / 24);
-    const capacity = Math.min(unit.beds, unit.staffed);
-    return { ...unit, forecast: projected, capacity, pressure: capacity ? projected / capacity : Number.POSITIVE_INFINITY, spillover: Math.max(0, projected - capacity) };
-  }).sort((a, b) => b.pressure - a.pressure), [units, hours]);
+  const projections = useMemo<Projection[]>(() => projectUnits(units, hours), [units, hours]);
   const totals = projections.reduce((sum, unit) => ({ staffed: sum.staffed + unit.capacity, occupied: sum.occupied + unit.occupied, forecast: sum.forecast + unit.forecast, spill: sum.spill + unit.spillover }), { staffed: 0, occupied: 0, forecast: 0, spill: 0 });
 
   const submitAuth = async (event: FormEvent<HTMLFormElement>) => {
