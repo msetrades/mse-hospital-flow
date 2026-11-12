@@ -1,25 +1,35 @@
 # MSE Flow Systems
 
-An operational capacity-planning workspace for hospital operations teams. It models aggregate unit-level bed pressure from census, arrivals, discharges, staffed capacity, and a selected planning horizon.
+An authenticated hospital operations workspace for aggregate bed-capacity snapshots, pressure projections, and saved planning scenarios. It is designed to help operations teams compare unit-level capacity constraints without collecting patient-level records.
 
 ## Workflow
 
-1. Import a CSV of aggregate unit snapshots (not patient rows).
-2. Validate physical beds, staffed beds, occupancy, and daily flow rates.
-3. Project occupancy over a 6-72 hour horizon using each unit's net admission/discharge flow.
-4. Rank units by forecast occupancy relative to staffed capacity, identify projected overflow, and export the scenario.
+1. Create an account and a private operations workspace.
+2. Import a unit-level CSV with exactly these headers: `unit,beds,occupied,admissions_24h,discharges_24h,staffed_beds,avg_los_hours`.
+3. Review validated occupancy, staffed capacity, arrivals, discharges, and projected spillover.
+4. Choose a 6-72 hour horizon in six-hour steps, save the scenario, or export the result as CSV.
+5. Reopen older aggregate snapshots and inspect saved scenario history.
 
-Required columns: `unit,beds,occupied,admissions_24h,discharges_24h,staffed_beds,avg_los_hours`.
+## Model boundaries
 
-The model is a deterministic linear-flow scenario, not a clinical forecast. It does not account for acuity, transfer delays, changing arrival patterns, or patient-level length-of-stay distributions. It must not be used for triage or individual care decisions.
+The projection is `current occupancy + (admissions per 24h - discharges per 24h) * horizon / 24`, floored at zero. Capacity pressure uses the lower of physical and staffed beds. This is a transparent linear-flow scenario, not a clinical forecast, capacity guarantee, or staffing recommendation. It does not model acuity, patient-level length of stay, transfers, cancellations, or time-varying arrival patterns. Never use it for triage or individual care decisions.
 
-## Data and release status
+## Privacy and access
 
-Selected CSV data is processed in the browser and not uploaded. Do not include patient identifiers or protected health information. Authentication, shared workspaces, audit logs, hospital-system integration, validation with an operating partner, and automated tests remain before production deployment. This product is in active development and is not deployed.
+- The CSV is parsed in the browser and only approved aggregate fields are stored in the app's dedicated `hospital` schema.
+- Patient names, identifiers, notes, and extra CSV columns are rejected by the importer. Do not place PHI in unit names or workspace labels.
+- Supabase email authentication is required; row-level security scopes records to the workspace owner. Anonymous table privileges are revoked.
+- This is not represented as HIPAA-certified or as a substitute for a hospital's approved data governance controls. Workspace collaboration, invitations, retention controls, and an audit interface are not implemented.
 
-## Run locally
+## Local setup
+
+Create `.env.local` from `.env.example` and add the Supabase project URL and publishable key. Never put a service-role or secret key in the browser.
 
 ```sh
 npm install
 npm run dev
 ```
+
+## Release status
+
+The authenticated core workflow is deployed, but the product is still under validation. Before operational adoption, validate assumptions with hospital operations partners, review privacy/security and retention requirements, complete accessibility and end-to-end tests, and establish support and incident procedures.

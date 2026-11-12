@@ -1,0 +1,6 @@
+# Supabase local state and credentials
+.branches
+.temp
+.env.local
+.env.*.local
+.env.keys

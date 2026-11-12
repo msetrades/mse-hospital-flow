@@ -1,0 +1,19 @@
+project_id = "mse-hospital-flow"
+
+[api]
+enabled = true
+schemas = ["public", "graphql_public", "hospital"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+auto_expose_new_tables = false
+
+[db]
+major_version = 17
+
+[db.migrations]
+enabled = true
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["https://mse-hospital-flow.vercel.app"]

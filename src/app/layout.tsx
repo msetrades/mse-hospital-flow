@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Flow Systems | MSE",
-  description: "Hospital capacity forecasting and aggregate patient-flow scenario planning.",
+  title: "MSE Flow Systems | Hospital Capacity Planning",
+  description: "Privacy-conscious hospital operations scenarios for aggregate unit capacity, flow, and staffing pressure.",
 };
 
 export default function RootLayout({
